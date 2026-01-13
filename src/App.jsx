@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Music, Upload, Play, Pause, RefreshCw, Calendar as CalendarIcon, Volume2, VolumeX, Heart, Trash2 } from 'lucide-react';
+import { Music, Upload, Play, Pause, RefreshCw, Calendar as CalendarIcon, Volume2, VolumeX, Heart, Trash2, ShoppingBag, Sparkles, ShoppingCart } from 'lucide-react';
 
 /**
  * UTILS & CONSTANTS
@@ -10,11 +10,14 @@ const TET_DATE_2026 = new Date('2026-02-17T00:00:00');
 
 const KEY_MILESTONES = {
   NORMAL: 'normal',
-  VALENTINE: 'valentine', // 14/02
-  NEAR_TET: 'near_tet',   // Từ 20 âm
-  ONG_TAO: 'ong_tao',     // 23 âm
-  GIAO_THUA: 'giao_thua', // 30 tết (hoặc 29 tùy tháng thiếu đủ)
-  TET: 'tet',             // Mùng 1
+  SHOPPING_JAN: 'shopping_jan', // 17/1
+  SPA_JAN: 'spa_jan',           // 21/1
+  SHOPPING_TET: 'shopping_tet', // 7/2 (20 Âm - Sắm Tết)
+  VALENTINE: 'valentine',       // 14/02
+  NEAR_TET: 'near_tet',         // Các ngày cận tết khác
+  ONG_TAO: 'ong_tao',           // 23 âm
+  GIAO_THUA: 'giao_thua',       // 30 tết
+  TET: 'tet',                   // Mùng 1
 };
 
 const getDaysRemaining = (currentDate) => {
@@ -47,21 +50,86 @@ const getDailyStyle = (date, theme) => {
     'bg-white', 'bg-yellow-50', 'bg-blue-50', 'bg-green-50', 'bg-pink-50', 'bg-orange-50'
   ];
 
-  // Danh sách ảnh nền Tết
+  // Danh sách ảnh nền Tết chung
   const tetImages = [
       'https://images.unsplash.com/photo-lr3uki9wn3I?w=600&q=80', // Lucky Bamboo
       'https://images.unsplash.com/photo-A9PwZPCsRUY?w=600&q=80', // Red Vase
       'https://images.unsplash.com/photo-YpQlqqEG4T0?w=600&q=80', // Red Box
       'https://images.unsplash.com/photo-ZZ8kHT3XgOw?w=600&q=80', // Family at Archway
       'https://images.unsplash.com/photo-EDsfwwNUYYU?w=600&q=80', // Red Envelope
-      'https://images.unsplash.com/photo-7D6ZA7wxHQ8?w=600&q=80', // Couple holding something
+      'https://images.unsplash.com/photo-7D6ZA7wxHQ8?w=600&q=80', // Couple
       'bg-gradient-to-br from-red-500 to-orange-500', 
       'https://images.unsplash.com/photo-bLOBGp8sCv4?w=600&q=80'  // Kite flying
   ];
 
-  const isTetSeason = [KEY_MILESTONES.NEAR_TET, KEY_MILESTONES.ONG_TAO, KEY_MILESTONES.GIAO_THUA, KEY_MILESTONES.TET].includes(theme);
+  // Ảnh riêng cho ngày 7/2 (Sắm Tết: Giỏ hàng, Hoa mai, Bánh chưng/đồ ăn)
+  const shoppingTetImages = [
+      'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=600&q=80', // Shopping/Gift
+      'https://images.unsplash.com/photo-1549887534-1541e9326642?w=600&q=80', // Hoa mai (Apricot Blossom)
+      'https://images.unsplash.com/photo-1549488352-257a965f9525?w=600&q=80', // Bánh chưng/Food vibe
+      'https://images.unsplash.com/photo-1512909006721-3d6018887383?w=600&q=80'  // Festive shopping
+  ];
 
-  if (!isTetSeason && theme !== KEY_MILESTONES.VALENTINE) {
+  // Logic chọn style
+  if (theme === KEY_MILESTONES.SHOPPING_JAN) {
+      // 17/1: Màu vàng nền, icon shopping
+      return {
+          appBg: 'bg-gradient-to-b from-yellow-200 to-yellow-400',
+          calendarBg: 'bg-yellow-300',
+          isImage: false,
+          imageSrc: null,
+          textColor: 'text-yellow-900',
+          borderColor: 'border-yellow-600',
+          overlayGradient: ''
+      };
+  } else if (theme === KEY_MILESTONES.SPA_JAN) {
+      // 21/1: Màu hồng, icon làm đẹp
+      return {
+          appBg: 'bg-gradient-to-b from-pink-200 to-purple-300',
+          calendarBg: 'bg-pink-200',
+          isImage: false,
+          imageSrc: null,
+          textColor: 'text-pink-800',
+          borderColor: 'border-pink-400',
+          overlayGradient: ''
+      };
+  } else if (theme === KEY_MILESTONES.SHOPPING_TET) {
+      // 7/2: Màu Vàng Gold, hình giỏ hàng/hoa mai/bánh chưng
+      const img = shoppingTetImages[seed % shoppingTetImages.length];
+      return {
+          appBg: 'bg-gradient-to-b from-yellow-600 to-red-700',
+          calendarBg: 'bg-yellow-500', // Gold color
+          isImage: true,
+          imageSrc: img,
+          textColor: 'text-red-900', // Chữ đỏ trên nền vàng gold
+          borderColor: 'border-red-700',
+          overlayGradient: 'bg-gradient-to-t from-yellow-500/90 via-yellow-400/50 to-transparent'
+      };
+  } else if (theme === KEY_MILESTONES.VALENTINE) {
+      // 14/2: Màu hồng đẹp mắt hơn
+      return {
+          appBg: 'bg-gradient-to-b from-rose-400 to-pink-600',
+          calendarBg: 'bg-gradient-to-br from-pink-200 via-pink-300 to-rose-300', // Gradient nền lịch
+          isImage: false, 
+          imageSrc: null,
+          textColor: 'text-rose-900',
+          borderColor: 'border-rose-500',
+          overlayGradient: ''
+      };
+  } else if ([KEY_MILESTONES.NEAR_TET, KEY_MILESTONES.ONG_TAO, KEY_MILESTONES.GIAO_THUA, KEY_MILESTONES.TET].includes(theme)) {
+      // TẾT Cổ Truyền
+      const selectedTheme = tetImages[seed % tetImages.length];
+      const isUrl = selectedTheme.startsWith('http');
+      return {
+          appBg: 'bg-gradient-to-b from-red-900 to-slate-900',
+          calendarBg: 'bg-red-600',
+          isImage: isUrl,
+          imageSrc: isUrl ? selectedTheme : null,
+          textColor: 'text-yellow-300',
+          borderColor: 'border-yellow-500',
+          overlayGradient: 'bg-gradient-to-t from-red-900/90 via-red-800/60 to-transparent'
+      };
+  } else {
       // Ngày thường
       return {
           appBg: `bg-gradient-to-b ${bgColors[seed % bgColors.length]}`,
@@ -71,32 +139,6 @@ const getDailyStyle = (date, theme) => {
           textColor: 'text-gray-800',
           borderColor: 'border-blue-600',
           overlayGradient: ''
-      };
-  } else if (theme === KEY_MILESTONES.VALENTINE) {
-      // Valentine
-      return {
-          appBg: 'bg-gradient-to-b from-pink-300 to-pink-500',
-          calendarBg: 'bg-pink-50',
-          isImage: false, 
-          imageSrc: null,
-          textColor: 'text-pink-900',
-          borderColor: 'border-pink-500',
-          overlayGradient: ''
-      };
-  } else {
-      // TẾT: Màu đỏ tươi, chữ vàng, nền tối hơn để tương phản
-      const selectedTheme = tetImages[seed % tetImages.length];
-      const isUrl = selectedTheme.startsWith('http');
-
-      return {
-          appBg: 'bg-gradient-to-b from-red-900 to-slate-900', // Nền App tối hơn để làm nổi bật lịch
-          calendarBg: 'bg-red-600', // Nền lịch đỏ tươi
-          isImage: isUrl,
-          imageSrc: isUrl ? selectedTheme : null,
-          textColor: 'text-yellow-300', // Chữ vàng kim
-          borderColor: 'border-yellow-500', // Viền vàng
-          // Overlay đỏ đậm dần lên trên để text vàng dễ đọc
-          overlayGradient: 'bg-gradient-to-t from-red-900/90 via-red-800/60 to-transparent'
       };
   }
 };
@@ -121,11 +163,16 @@ const getLunarDateString = (date) => {
 
 const getThemeStatus = (date, daysRemaining) => {
   if (!date) return KEY_MILESTONES.NORMAL;
-  const month = date.getMonth(); 
+  const month = date.getMonth(); // 0 = Jan, 1 = Feb
   const day = date.getDate();
 
+  // Các mốc mới
+  if (month === 0 && day === 17) return KEY_MILESTONES.SHOPPING_JAN;
+  if (month === 0 && day === 21) return KEY_MILESTONES.SPA_JAN;
+  if (month === 1 && day === 7) return KEY_MILESTONES.SHOPPING_TET;
   if (month === 1 && day === 14) return KEY_MILESTONES.VALENTINE;
 
+  // Các mốc Tết cũ
   if (daysRemaining <= 0) return KEY_MILESTONES.TET;
   if (daysRemaining === 1) return KEY_MILESTONES.GIAO_THUA;
   if (daysRemaining === 7) return KEY_MILESTONES.ONG_TAO; 
@@ -375,15 +422,16 @@ const CalendarLeaf = ({ date, daysRemaining, theme, onTear, isTop }) => {
   const style = getDailyStyle(date, theme);
 
   const getLeafClasses = () => {
-    // Thêm border-4 để tạo viền rõ ràng bao quanh toàn bộ lịch
     let classes = `${style.calendarBg} ${style.textColor} border-t-8 border-x-4 border-b-4`;
     
-    // Áp dụng màu border từ style
-    if (theme === KEY_MILESTONES.VALENTINE) classes += " border-pink-500 shadow-2xl shadow-pink-900/30";
-    else if (theme === KEY_MILESTONES.NORMAL) classes += " border-blue-600 shadow-2xl";
-    else {
-        // Style cho Tết: Viền vàng, Shadow đậm để tách biệt với nền đỏ
+    if (theme === KEY_MILESTONES.VALENTINE) classes += ` ${style.borderColor} shadow-2xl shadow-rose-900/30`;
+    else if (theme === KEY_MILESTONES.SHOPPING_JAN) classes += ` ${style.borderColor} shadow-2xl shadow-yellow-900/20`;
+    else if (theme === KEY_MILESTONES.SPA_JAN) classes += ` ${style.borderColor} shadow-2xl shadow-pink-900/20`;
+    else if (theme === KEY_MILESTONES.SHOPPING_TET) classes += ` ${style.borderColor} shadow-[0_20px_50px_rgba(0,0,0,0.4)]`;
+    else if ([KEY_MILESTONES.NEAR_TET, KEY_MILESTONES.ONG_TAO, KEY_MILESTONES.GIAO_THUA, KEY_MILESTONES.TET].includes(theme)) {
         classes += ` ${style.borderColor} shadow-[0_20px_50px_rgba(0,0,0,0.5)]`;
+    } else {
+        classes += " border-blue-600 shadow-2xl";
     }
     
     return classes;
@@ -391,15 +439,18 @@ const CalendarLeaf = ({ date, daysRemaining, theme, onTear, isTop }) => {
 
   const getFooterText = () => {
     if (theme === KEY_MILESTONES.VALENTINE) return "Happy Valentine's Day";
+    if (theme === KEY_MILESTONES.SHOPPING_JAN) return "Shopping Mặc Tết";
+    if (theme === KEY_MILESTONES.SPA_JAN) return "Spa Thư Giãn";
+    if (theme === KEY_MILESTONES.SHOPPING_TET) return "Sắm Sửa Quà Tết";
     if (daysRemaining === 0) return "CHÚC MỪNG NĂM MỚI";
     if (daysRemaining === 7) return "ĐƯA ÔNG TÁO VỀ TRỜI";
     if (daysRemaining === 1) return "GIAO THỪA";
-    return `Còn ${daysRemaining} ngày nữa đến Tết`;
+    return `Countdown ${daysRemaining} ngày nữa thoaiii`;
   };
 
   return (
     <div
-      className={`absolute top-0 left-0 w-full h-full rounded-lg flex flex-col items-center justify-between p-6 select-none cursor-grab active:cursor-grabbing transition-transform duration-200 overflow-hidden ${getLeafClasses()} ${isTorn ? 'opacity-0 pointer-events-none transition-all duration-500 ease-out' : ''}`}
+      className={`absolute top-0 left-0 w-full h-full rounded-lg flex flex-col items-center justify-between p-6 select-none cursor-grab active:cursor-grabbing transition-transform duration-200 overflow-hidden touch-none ${getLeafClasses()} ${isTorn ? 'opacity-0 pointer-events-none transition-all duration-500 ease-out' : ''}`}
       style={{
         transform: isTorn 
             ? `translate(${position.x * 1.5}px, ${position.y * 1.5}px) rotate(${position.x * 0.1}deg)` 
@@ -421,8 +472,7 @@ const CalendarLeaf = ({ date, daysRemaining, theme, onTear, isTop }) => {
                 className="absolute inset-0 bg-cover bg-center opacity-30 pointer-events-none mix-blend-multiply" 
                 style={{backgroundImage: `url(${style.imageSrc})`}}
             />
-            {/* Gradient overlay to ensure text readability - Màu đỏ đậm nếu là Tết */}
-            <div className={`absolute inset-0 pointer-events-none ${style.overlayGradient || 'bg-gradient-to-t from-white/90 via-white/80 to-transparent'}`} />
+            <div className={`absolute inset-0 pointer-events-none ${style.overlayGradient}`} />
         </>
       )}
 
@@ -454,14 +504,30 @@ const CalendarLeaf = ({ date, daysRemaining, theme, onTear, isTop }) => {
       <div className="w-full text-center border-t border-current border-opacity-30 pt-4 relative z-10">
         <p className="font-serif italic text-lg opacity-90">{getFooterText()}</p>
         
+        {/* ICONS FOR MILESTONES */}
+        {theme === KEY_MILESTONES.SHOPPING_JAN && (
+           <div className="mt-2 text-yellow-800 font-bold text-sm flex items-center justify-center gap-2 animate-bounce">
+               <ShoppingBag size={20} /> Đi Shopping
+           </div>
+        )}
+        {theme === KEY_MILESTONES.SPA_JAN && (
+           <div className="mt-2 text-pink-600 font-bold text-sm flex items-center justify-center gap-2 animate-pulse">
+               <Sparkles size={20} /> Spa & Làm Đẹp
+           </div>
+        )}
+        {theme === KEY_MILESTONES.SHOPPING_TET && (
+           <div className="mt-2 text-red-900 font-bold text-sm flex items-center justify-center gap-2 animate-bounce">
+               <ShoppingCart size={20} /> Sắm Tết
+           </div>
+        )}
         {theme === KEY_MILESTONES.ONG_TAO && (
            <div className="mt-2 text-yellow-300 font-bold text-sm flex items-center justify-center gap-2 animate-pulse">
                🐟 Tiễn Ông Táo
            </div>
         )}
         {theme === KEY_MILESTONES.VALENTINE && (
-           <div className="mt-2 text-pink-600 font-bold text-sm flex items-center justify-center gap-2 animate-pulse">
-               ❤️ Lễ Tình Nhân
+           <div className="mt-2 text-rose-600 font-bold text-sm flex items-center justify-center gap-2 animate-pulse">
+               <Heart size={20} fill="currentColor" /> Lễ Tình Nhân
            </div>
         )}
       </div>
@@ -571,7 +637,6 @@ export default function TetCountdownApp() {
                 <div className="absolute bottom-20 right-20 text-red-500 opacity-40 animate-pulse text-8xl">❤️</div>
                 <div className="absolute top-1/2 left-1/4 text-white opacity-20 text-9xl transform -rotate-12">Love</div>
                 
-                {/* Falling Hearts */}
                 {[...Array(10)].map((_, i) => (
                     <div key={i} className="absolute text-pink-600 opacity-30 text-4xl animate-pulse" 
                          style={{
@@ -645,12 +710,11 @@ export default function TetCountdownApp() {
     let target = new Date();
     switch(milestone) {
         case 'NOW': target = new Date(); break;
-        case 'BEFORE_TET': target = new Date('2026-02-05T00:00:00'); break; // 18 Am
-        case '13_FEB': target = new Date('2026-02-13T00:00:00'); break; // Tear to trigger music
+        case 'SHOPPING': target = new Date('2026-01-17T00:00:00'); break; // 17/1
+        case 'SPA': target = new Date('2026-01-21T00:00:00'); break; // 21/1
+        case 'SHOP_TET': target = new Date('2026-02-07T00:00:00'); break; // 7/2
         case 'VALENTINE': target = new Date('2026-02-14T00:00:00'); break; // 14/2
-        case '20_AM': target = new Date('2026-02-07T00:00:00'); break; 
         case '23_AM': target = new Date('2026-02-10T00:00:00'); break; 
-        case '30_AM': target = new Date('2026-02-16T00:00:00'); break; 
         case 'TET': target = new Date('2026-02-17T00:00:00'); break; 
     }
     setCurrentDate(target);
@@ -658,8 +722,17 @@ export default function TetCountdownApp() {
   };
 
   return (
-    <div className={`relative w-full h-screen overflow-hidden flex flex-col items-center justify-center transition-colors duration-1000 ${dailyStyle.appBg}`}>
-      
+    <div className={`relative w-full h-screen overflow-hidden flex flex-col items-center justify-center transition-colors duration-1000 select-none touch-none pt-[env(safe-area-inset-top)] ${dailyStyle.appBg}`}>
+      {/* Mobile Styles Injection */}
+      <style>{`
+        body {
+          overscroll-behavior: none;
+          -webkit-touch-callout: none;
+          -webkit-user-select: none;
+          user-select: none;
+        }
+      `}</style>
+
       {renderDecorations()}
 
       {theme !== KEY_MILESTONES.TET && (
@@ -706,13 +779,12 @@ export default function TetCountdownApp() {
                  <h3 className="font-bold text-gray-700 mb-2 border-b pb-1">Cỗ máy thời gian</h3>
                  <div className="grid grid-cols-2 gap-2 text-xs">
                      <button onClick={() => timeTravelTo('NOW')} className="bg-blue-100 hover:bg-blue-200 p-2 rounded text-blue-800">Hiện tại</button>
-                     <button onClick={() => timeTravelTo('BEFORE_TET')} className="bg-gray-100 hover:bg-gray-200 p-2 rounded text-gray-800">Ngày thường</button>
-                     <button onClick={() => timeTravelTo('13_FEB')} className="bg-green-100 hover:bg-green-200 p-2 rounded text-green-800">13/02</button>
-                     <button onClick={() => timeTravelTo('VALENTINE')} className="bg-pink-100 hover:bg-pink-200 p-2 rounded text-pink-800">❤️ 14/02</button>
-                     <button onClick={() => timeTravelTo('20_AM')} className="bg-red-100 hover:bg-red-200 p-2 rounded text-red-800">20 Âm</button>
+                     <button onClick={() => timeTravelTo('SHOPPING')} className="bg-yellow-100 hover:bg-yellow-200 p-2 rounded text-yellow-800">🛍️ 17/1</button>
+                     <button onClick={() => timeTravelTo('SPA')} className="bg-pink-100 hover:bg-pink-200 p-2 rounded text-pink-800">✨ 21/1</button>
+                     <button onClick={() => timeTravelTo('SHOP_TET')} className="bg-orange-100 hover:bg-orange-200 p-2 rounded text-orange-800">🛒 7/2</button>
+                     <button onClick={() => timeTravelTo('VALENTINE')} className="bg-rose-100 hover:bg-rose-200 p-2 rounded text-rose-800">❤️ 14/2</button>
                      <button onClick={() => timeTravelTo('23_AM')} className="bg-yellow-100 hover:bg-yellow-200 p-2 rounded text-yellow-800">23 Âm</button>
-                     <button onClick={() => timeTravelTo('30_AM')} className="bg-purple-100 hover:bg-purple-200 p-2 rounded text-purple-800">29 Tết</button>
-                     <button onClick={() => timeTravelTo('TET')} className="bg-pink-100 hover:bg-pink-200 p-2 rounded text-pink-800 col-span-2 font-bold">💥 Mùng 1 Tết</button>
+                     <button onClick={() => timeTravelTo('TET')} className="bg-red-100 hover:bg-red-200 p-2 rounded text-red-800 col-span-2 font-bold">💥 Mùng 1 Tết</button>
                  </div>
              </div>
          )}
@@ -729,7 +801,7 @@ export default function TetCountdownApp() {
       <AudioPlayer isPlaying={isPlaying} userAudioSrc={audioSrc} defaultAudioSrc={audioSrc} />
 
       <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 text-white/50 text-xs pointer-events-none">
-          {daysRemaining > 0 ? "Xé lịch để đếm ngược" : ""}
+          {daysRemaining > 0 ? "Xé lịch để đếm ngược" : ""}
       </div>
 
     </div>
